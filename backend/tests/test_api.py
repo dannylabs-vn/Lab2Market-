@@ -25,6 +25,12 @@ VI_CHALLENGE = (
     "theo mô hình tiến sĩ công nghiệp."
 )
 
+EN_CHALLENGE = (
+    "We are developing a rapid diagnostics test for infectious disease. "
+    "We have lab proof of concept and need clinical-grade validation within 18 months, "
+    "looking for a research partnership."
+)
+
 CONFIRMED_CHALLENGE = {
     "raw_text": VI_CHALLENGE,
     "lang": "vi",
@@ -52,6 +58,19 @@ def test_extract_vietnamese_mock():
     # Every proposed field starts as AI INFERENCE; raw text is the user's own.
     assert body["provenance"]["domain"] == "AI_INFERENCE"
     assert body["provenance"]["raw_text"] == "USER_PROVIDED_DATA"
+
+
+def test_extract_english_mock():
+    res = client.post("/api/extract", json={"text": EN_CHALLENGE, "lang": "en"})
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert body["mock"] is True
+    challenge = body["challenge"]
+    assert challenge["lang"] == "en"
+    assert challenge["domain"] == "diagnostics"
+    assert challenge["trl_current"] == 4  # lab proof of concept
+    assert challenge["timeline_months"] == 18
+    assert challenge["involvement_preference"] == "research_partnership"
 
 
 def test_match_ranked_breakdown_and_provenance():
@@ -113,3 +132,51 @@ def test_identical_inputs_identical_report():
     second = client.post("/api/match", json={"challenge": CONFIRMED_CHALLENGE})
     assert first.status_code == 200 and second.status_code == 200
     assert first.json() == second.json()
+
+
+def test_all_profiles_rejected():
+    # Impossible challenge: target TRL 9 in 3 months when current TRL is 8
+    impossible = {
+        "raw_text": "Need TRL 9 in 3 months",
+        "lang": "en",
+        "domain": "natural_language_processing",
+        "trl_current": 8,
+        "trl_target": 9,
+        "timeline_months": 3,
+        "confirmed_fields": ["domain", "trl_current", "trl_target", "timeline_months"],
+    }
+    res = client.post("/api/match", json={"challenge": impossible})
+    assert res.status_code == 200
+    body = res.json()
+    assert body["ranked"] == []
+    assert len(body["rejected"]) == 4
+    assert body["report_action"]["key"] == "action_adjust_constraints"
+
+
+def test_timeline_ratio_boundary():
+    # Typical duration 24 months / 16 months = 1.5 (<= 1.5, accepted) vs 24 / 15 = 1.6 (> 1.5, rejected)
+    challenge_16 = {
+        "raw_text": "16 month timeline",
+        "lang": "en",
+        "domain": "computer_vision",
+        "trl_current": 3,
+        "trl_target": 7,
+        "timeline_months": 16,
+        "confirmed_fields": ["domain", "trl_current", "trl_target", "timeline_months"],
+    }
+    res = client.post("/api/match", json={"challenge": challenge_16})
+    assert res.status_code == 200
+    accepted_ids = [p["profile_id"] for p in res.json()["ranked"]]
+    # phd-ai-cv-02 duration is 24 months. 24/16 = 1.5 <= 1.5 -> accepted!
+    assert "phd-ai-cv-02" in accepted_ids
+
+
+def test_rate_limit_extraction():
+    headers = {"X-Forwarded-For": "192.168.1.100"}
+    for _ in range(10):
+        res = client.post("/api/extract", json={"text": "test prompt", "lang": "en"}, headers=headers)
+        assert res.status_code == 200
+    # 11th request within 30s window must be rate limited
+    res = client.post("/api/extract", json={"text": "test prompt", "lang": "en"}, headers=headers)
+    assert res.status_code == 429
+    assert res.json()["code"] == "rate_limited"

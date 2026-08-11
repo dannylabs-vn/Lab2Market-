@@ -29,7 +29,9 @@ def match_challenge(body: MatchRequest, request: Request):
     lang = body.challenge.lang
 
     # --- Guards ---
-    limited, retry_after = security.check_rate_limit(_client_key(request))
+    limited, retry_after = security.check_rate_limit(
+        _client_key(request), endpoint="match", max_requests=security.RATE_LIMIT_MATCH_MAX
+    )
     if limited:
         return JSONResponse(
             status_code=429,

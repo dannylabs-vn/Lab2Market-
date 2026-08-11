@@ -26,17 +26,23 @@ _INJECTION_PATTERNS = [
 _request_log: dict[str, list[float]] = {}
 
 
-def check_rate_limit(client_key: str) -> tuple[bool, int]:
-    """Sliding-window per-client limit. Returns (limited, retry_after_s)."""
+RATE_LIMIT_MATCH_MAX = 60  # deterministic match allows rapid slider adjustments
+
+
+def check_rate_limit(
+    client_key: str, endpoint: str = "extract", max_requests: int = RATE_LIMIT_MAX
+) -> tuple[bool, int]:
+    """Sliding-window per-client per-endpoint limit. Returns (limited, retry_after_s)."""
     now = time.monotonic()
     window_start = now - RATE_LIMIT_WINDOW_S
-    hits = [t for t in _request_log.get(client_key, []) if t > window_start]
-    if len(hits) >= RATE_LIMIT_MAX:
+    log_key = f"{client_key}:{endpoint}"
+    hits = [t for t in _request_log.get(log_key, []) if t > window_start]
+    if len(hits) >= max_requests:
         retry_after = int(hits[0] - window_start) + 1
-        _request_log[client_key] = hits
+        _request_log[log_key] = hits
         return True, max(retry_after, 1)
     hits.append(now)
-    _request_log[client_key] = hits
+    _request_log[log_key] = hits
     return False, 0
 
 

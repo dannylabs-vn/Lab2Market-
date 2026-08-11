@@ -31,7 +31,7 @@ _SUBDOMAIN_KEYWORDS: dict[str, list[str]] = {
     "machine_learning": ["machine learning", "học máy", "deep learning", "học sâu", "dự đoán"],
     "data_science": ["dữ liệu", "data", "phân tích dữ liệu", "analytics"],
     "pharmaceuticals": ["thuốc", "dược", "drug", "vaccine", "dược phẩm"],
-    "diagnostics": ["chẩn đoán", "diagnos", "xét nghiệm", "test nhanh"],
+    "diagnostics": ["chẩn đoán", "diagnostics", "diagnostic", "xét nghiệm", "test nhanh"],
     "biotechnology": ["sinh học", "biotech", "enzyme", "lên men"],
     "medical_devices": ["thiết bị y tế", "medical device"],
     "robotics": ["robot", "cánh tay robot"],
@@ -53,7 +53,7 @@ _TRL_SIGNALS: list[tuple[list[str], int]] = [
     (["thương mại", "commercialize", "vận hành thực tế", "production", "đang dùng"], 8),
     (["pilot", "thí điểm"], 6),
     (["prototype", "mẫu thử", "poc", "proof of concept", "phòng thí nghiệm", "lab"], 4),
-    (["ý tưởng", "idea", "concept", "nghiên cứu"], 2),
+    (["ý tưởng", "idea", "concept formulation", "technology concept", "nghiên cứu"], 2),
 ]
 _DEFAULT_TRL_CURRENT = 3  # mid-lab maturity when the text says nothing
 _TRL_TARGET_COMMERCIAL = 8

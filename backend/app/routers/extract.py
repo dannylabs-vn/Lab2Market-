@@ -35,7 +35,9 @@ def _error(status: int, code: str, body: ExtractRequest, headers: dict | None = 
 @router.post("/extract", response_model=ExtractionResponse)
 def extract_challenge(body: ExtractRequest, request: Request):
     # --- Guards (always before business logic) ---
-    limited, retry_after = security.check_rate_limit(_client_key(request))
+    limited, retry_after = security.check_rate_limit(
+        _client_key(request), endpoint="extract"
+    )
     if limited:
         return _error(
             429, "rate_limited", body, headers={"Retry-After": str(retry_after)}

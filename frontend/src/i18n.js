@@ -42,7 +42,7 @@ export const DICT = {
     field_domain: "Lĩnh vực",
     field_trl_current: "TRL hiện tại",
     field_trl_target: "TRL mục tiêu",
-    field_timeline_months: "Thứời gian (tháng)",
+    field_timeline_months: "Thời gian (tháng)",
     field_involvement_preference: "Mô hình hợp tác",
     field_raw_text: "Mô tả gốc của bạn",
     selectPlaceholder: "— Chọn —",
@@ -72,6 +72,8 @@ export const DICT = {
     criterion_trl: "TRL",
     criterion_timeline: "Tiến độ",
     criterion_involvement: "Hợp tác",
+    weightsZeroHint:
+      "Tất cả trọng số đang ở 0 — engine đã dùng lại bộ trọng số mặc định của bài báo (35/25/15/15/10) nên xếp hạng bên dưới không đổi.",
 
     domain_artificial_intelligence: "Trí tuệ nhân tạo",
     domain_machine_learning: "Học máy",
@@ -136,7 +138,7 @@ export const DICT = {
     reject_trl_above:
       "Nghiên cứu bắt đầu từ TRL {lab_trl_min}, vượt xa mục tiêu ({trl_target})",
     reject_timeline_ratio:
-      "Thờiu gian điển hình {lab_months} tháng vượt {ratio}× tiến độ {months} tháng của bạn",
+      "Thời gian điển hình {lab_months} tháng vượt {ratio}× tiến độ {months} tháng của bạn",
 
     err_network: "Không kết nối được máy chủ. Kiểm tra backend đang chạy.",
     unknownError: "Đã xảy ra lỗi không xác định.",
@@ -181,7 +183,7 @@ export const DICT = {
     field_domain: "Domain",
     field_trl_current: "Current TRL",
     field_trl_target: "Target TRL",
-    field_timeline_months: "Timeline (months)",
+    field_timeline_months: "Thời gian (tháng)",
     field_involvement_preference: "Collaboration model",
     field_raw_text: "Your original description",
     selectPlaceholder: "— Select —",
@@ -211,6 +213,8 @@ export const DICT = {
     criterion_trl: "TRL",
     criterion_timeline: "Timeline",
     criterion_involvement: "Involvement",
+    weightsZeroHint:
+      "All weights are 0 — the engine fell back to the paper-default weights (35/25/15/15/10), so the ranking below is unchanged.",
 
     domain_artificial_intelligence: "Artificial Intelligence",
     domain_machine_learning: "Machine Learning",
@@ -275,7 +279,7 @@ export const DICT = {
     reject_trl_above:
       "Research starts at TRL {lab_trl_min}, far past your target ({trl_target})",
     reject_timeline_ratio:
-      "Typical duration {lab_months} months is {ratio}× your {months}-month timeline",
+      "Typical duration {lab_months} months exceeds {ratio}× your {months}-month timeline",
 
     err_network: "Cannot reach the server. Check that the backend is running.",
     unknownError: "An unknown error occurred.",

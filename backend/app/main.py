@@ -31,18 +31,33 @@ app.include_router(match.router)
 app.include_router(reference.router)
 
 
+def _lang_from_body(exc: RequestValidationError) -> Lang:
+    """Best-effort language for a 400 payload error: /api/extract carries
+    `lang` at the top level, /api/match under `challenge.lang`. A malformed
+    body with no parseable lang defaults to VI — a wrong-language 400 is a
+    minor UX wart, never a leak (rule §8)."""
+    body = exc.body
+    if isinstance(body, dict):
+        for candidate in (body.get("lang"), (body.get("challenge") or {}).get("lang")):
+            if isinstance(candidate, str) and candidate in {"vi", "en"}:
+                return Lang(candidate)
+    return Lang.VI
+
+
 @app.exception_handler(RequestValidationError)
 async def invalid_payload_handler(request: Request, exc: RequestValidationError):
     """Schema failures -> the consistent 400 contract. Internals never leak."""
     payload = ApiError(
-        code="invalid_payload", message=api_message("invalid_payload", Lang.VI)
+        code="invalid_payload", message=api_message("invalid_payload", _lang_from_body(exc))
     )
     return JSONResponse(status_code=400, content=payload.model_dump())
 
 
 @app.exception_handler(Exception)
 async def internal_error_handler(request: Request, exc: Exception):
-    """Last-resort guard: fail gracefully, never expose a stack trace."""
+    """Last-resort guard: fail gracefully, never expose a stack trace.
+    VI default is deliberate: a 500 carries no reliable client-language
+    context, and this message must never itself raise."""
     payload = ApiError(
         code="internal_error", message=api_message("internal_error", Lang.VI)
     )

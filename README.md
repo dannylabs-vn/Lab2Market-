@@ -12,7 +12,7 @@
 
 ## 1. WHERE WE ARE RIGHT NOW
 
-**Backend: COMPLETE and verified — 6/6 pytest green.** Frontend: scaffold done, components in progress.
+**Backend: COMPLETE and verified — 13/13 pytest green.** Frontend: complete, build clean.
 
 ### Done — backend (`backend/`, FastAPI, runs with NO API key in mock mode)
 
@@ -30,7 +30,7 @@
 | `app/services/security.py`                                      | ✅     | Rate limit (10 req/30s per IP), sanitize, injection guard                                                              |
 | `app/messages.py`                                               | ✅     | Server-side VI/EN error catalog                                                                                        |
 | `app/routers/extract.py`, `match.py`, `reference.py`, `main.py` | ✅     | Guards → validation → engine → provenance. CORS env-driven. `/api/health` for Cloud Run                                |
-| `backend/tests/test_api.py`                                     | ✅ 6/6 | VI extraction, ranking+breakdown+provenance, weight-change reorder, missing-fields 400, injection 400, determinism     |
+| `backend/tests/test_api.py`                                     | ✅ 13/13 | VI extraction, ranking+breakdown+provenance, weight-change reorder, missing-fields 400, injection 400, determinism, all-zero-weights, localized errors, unconfirmed-field provenance |
 
 **Verified ranking** (VI NLP challenge, default weights): NLP lab 0.631 → CV lab 0.578 → MFG 0.442 → BIO 0.291. Weight sliders genuinely reorder (tested).
 
@@ -68,7 +68,7 @@
 
 ```powershell
 cd backend;  pip install -r requirements.txt; uvicorn app.main:app --port 8000 --reload
-cd backend;  python -m pytest tests/ -q     # 6/6 must stay green
+cd backend;  python -m pytest tests/ -q     # 13/13 must stay green
 cd frontend; npm install; npm run dev        # http://localhost:5173
 ```
 
@@ -90,7 +90,7 @@ Per rule §14 — USP → Architecture → Trust Layer → Google-native → Dep
 8. **Round 1 audit rerun** — the master prompt's 18-phase audit against the now-real codebase; produce current + target scorecards and the TOP 10 WINNING PLAN.
 9. **Product README for judges** (this file is a working-context doc, not that).
 
-**Known limitations (document honestly):** in-memory rate limiting (per instance), 4-profile illustrative seed data, TF-IDF semantic fallback weaker than Gemini embeddings, no persistence/auth yet.
+**Known limitations (document honestly):** in-memory rate limiting (per instance), 4-profile illustrative seed data, TF-IDF semantic fallback weaker than Gemini embeddings, no persistence/auth yet; regex-based injection guard is non-exhaustive (blocks known patterns, not every novel payload); mock extractor uses keyword heuristics and does not parse explicit "TRL N" numeric strings; `/api/reference` failure degrades to a localized error + Retry (not a fallback taxonomy — the taxonomy stays backend-owned per rule §12); Cloud Run, Firebase, and deployed-origin CORS remain unverified (need GCP deployment).
 
 ---
 
@@ -111,11 +111,11 @@ NON-NEGOTIABLES:
   (0.35/0.25/0.15/0.15/0.10), domain scores (EXACT 1.0 / GROUP 0.9 / ADJACENT 0.5 / OTHER 0.1)
   and TF-IDF sqrt scaling are deliberate, test-verified decisions (README §1).
 - Do NOT touch the backend except to keep tests green:
-  cd backend; python -m pytest tests/ -q  → must stay 6/6 after every change.
+  cd backend; python -m pytest tests/ -q  → must stay 13/13 after every change.
 - Never guess. If a requirement is unclear, stop and ask (rule §26).
 
 CURRENT STATE:
-Backend COMPLETE (6/6 pytest green, runs in mock mode with no API key).
+Backend COMPLETE (13/13 pytest green, runs in mock mode with no API key).
 Frontend scaffold done: package.json, vite.config.js, index.html, src/main.jsx, src/api.js, src/i18n.js.
 Missing: src/styles.css, src/App.jsx, and 5 components under src/components/.
 

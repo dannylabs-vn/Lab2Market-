@@ -180,3 +180,64 @@ def test_rate_limit_extraction():
     res = client.post("/api/extract", json={"text": "test prompt", "lang": "en"}, headers=headers)
     assert res.status_code == 429
     assert res.json()["code"] == "rate_limited"
+
+
+def test_all_zero_weights_do_not_crash():
+    # Division-by-zero guard: an all-zero vector must normalize to the
+    # paper-default profile, never crash the request (audit §5).
+    res = client.post(
+        "/api/match",
+        json={
+            "challenge": CONFIRMED_CHALLENGE,
+            "weights": {
+                "semantic": 0, "domain": 0, "trl": 0, "timeline": 0, "involvement": 0,
+            },
+        },
+    )
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert len(body["ranked"]) > 0
+    # Normalized weights must sum to 1 (the paper-default profile).
+    weights = body["weights"]
+    total = sum(weights[k] for k in ("semantic", "domain", "trl", "timeline", "involvement"))
+    assert abs(total - 1.0) < 1e-6
+
+
+def test_invalid_payload_is_localized():
+    # EN empty text -> invalid_payload in English, not Vietnamese (audit §18).
+    res = client.post("/api/extract", json={"text": "", "lang": "en"})
+    assert res.status_code == 400
+    body = res.json()
+    assert body["code"] == "invalid_payload"
+    assert body["message"] == "The submitted payload is invalid."
+
+    # EN invalid weights (>1) -> invalid_payload in English.
+    en_challenge = {**CONFIRMED_CHALLENGE, "lang": "en"}
+    res = client.post(
+        "/api/match",
+        json={
+            "challenge": en_challenge,
+            "weights": {"semantic": 2, "domain": 0, "trl": 0, "timeline": 0, "involvement": 0},
+        },
+    )
+    assert res.status_code == 400
+    assert res.json()["message"] == "The submitted payload is invalid."
+
+
+def test_unconfirmed_field_stays_ai_inference():
+    # Only 'domain' confirmed; other extracted fields must remain AI_INFERENCE
+    # in the report — the Trust Layer never launders unconfirmed model output
+    # into user data (audit §7).
+    partial = {
+        **CONFIRMED_CHALLENGE,
+        "involvement_preference": "industrial_phd",
+        "confirmed_fields": ["domain"],
+    }
+    res = client.post("/api/match", json={"challenge": partial})
+    assert res.status_code == 200, res.text
+    prov = res.json()["provenance"]
+    assert prov["domain"] == "USER_CONFIRMED_DATA"
+    assert prov["trl_current"] == "AI_INFERENCE"
+    assert prov["trl_target"] == "AI_INFERENCE"
+    assert prov["timeline_months"] == "AI_INFERENCE"
+    assert prov["involvement_preference"] == "AI_INFERENCE"

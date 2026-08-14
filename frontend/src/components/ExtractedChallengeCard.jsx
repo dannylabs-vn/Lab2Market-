@@ -1,22 +1,11 @@
-// ExtractedChallengeCard — step 2: confirm/edit AI-inferred fields (rule §2/§7).
-// The user reviews the extraction, edits any field, and confirms. Editing a
-// field is the explicit action that moves it AI_INFERENCE -> USER_CONFIRMED_DATA
-// (recorded in confirmed_fields, never implicit). Confirm reports the assembled
-// challenge upward via `onConfirm` — the parent owns the match call.
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { t } from "../i18n";
 import ProvenanceBadge from "./ProvenanceBadge";
 
-// The engine's required fields (mirrors backend REQUIRED_MATCH_FIELDS).
 const REQUIRED_FIELDS = ["domain", "trl_current", "trl_target", "timeline_months"];
-
 const TRL_LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 function buildDomainOptions(domainTaxonomy, lang) {
-  // One <optgroup> per group; inside it, a group-level option plus each
-  // subdomain option. This covers both group-level and subdomain-level values
-  // the engine accepts (resolve_domain handles either).
   return Object.entries(domainTaxonomy || {}).map(([group, subdomains]) => ({
     group,
     groupLabel: t(lang, `domain_${group}`),
@@ -32,9 +21,9 @@ export default function ExtractedChallengeCard({
   reference,
   lang,
   onConfirm,
+  onBack,
   disabled = false,
 }) {
-  // Local editable state, seeded from the extracted challenge.
   const [fields, setFields] = useState({
     domain: challenge.domain ?? "",
     trl_current: challenge.trl_current ?? "",
@@ -42,19 +31,23 @@ export default function ExtractedChallengeCard({
     timeline_months: challenge.timeline_months ?? "",
     involvement_preference: challenge.involvement_preference ?? "",
   });
-  // Explicitly confirmed fields (edited/touched). Starts from what the
-  // client already recorded, then grows on each edit.
+
   const [confirmed, setConfirmed] = useState(
     () => new Set(challenge.confirmed_fields || [])
   );
 
   const domainOptions = buildDomainOptions(reference?.domain_taxonomy, lang);
-  const involvementTypes = reference?.involvement_types || [];
+  const involvementTypes = reference?.involvement_types || [
+    "industrial_phd",
+    "co_supervision",
+    "consulting",
+    "research_partnership",
+    "none",
+  ];
   const trlLevels = reference?.trl_levels || TRL_LEVELS;
 
   function editField(name, value) {
     setFields((prev) => ({ ...prev, [name]: value }));
-    // Touching a field is the explicit confirmation action (rule §7).
     setConfirmed((prev) => {
       const next = new Set(prev);
       next.add(name);
@@ -63,8 +56,6 @@ export default function ExtractedChallengeCard({
   }
 
   function provenanceFor(name) {
-    // raw_text is always the user's own; other fields flip to USER_CONFIRMED
-    // only after an explicit edit. Missing (empty) fields carry no badge.
     if (name === "raw_text") return "USER_PROVIDED_DATA";
     if (fields[name] === "" || fields[name] === null) return null;
     return confirmed.has(name) ? "USER_CONFIRMED_DATA" : "AI_INFERENCE";
@@ -73,15 +64,16 @@ export default function ExtractedChallengeCard({
   const missing = REQUIRED_FIELDS.filter(
     (f) => fields[f] === "" || fields[f] === null
   );
+
   const targetAfterCurrent =
     fields.trl_target !== "" &&
     fields.trl_current !== "" &&
     Number(fields.trl_target) > Number(fields.trl_current);
-  // Timeline must satisfy the API contract (3-120) client-side too, so the
-  // most likely 422 is caught here instead of reaching the backend.
+
   const timelineValid =
     fields.timeline_months === "" ||
     (Number(fields.timeline_months) >= 3 && Number(fields.timeline_months) <= 120);
+
   const canConfirm = missing.length === 0 && targetAfterCurrent && timelineValid;
 
   function handleConfirm() {
@@ -100,35 +92,41 @@ export default function ExtractedChallengeCard({
     onConfirm(nextChallenge);
   }
 
-  function fieldRow(label, name, control) {
-    const badge = provenanceFor(name);
-    const isMissing = REQUIRED_FIELDS.includes(name) && badge === null;
-    return (
-      <div className={`field ${isMissing ? "field--missing" : ""}`}>
-        <label className="field__label">
-          <span>{label}</span>
-          {badge && <ProvenanceBadge classKey={badge} lang={lang} />}
-        </label>
-        {control}
-      </div>
-    );
-  }
-
   return (
-    <div className="extracted">
-      <h2>{t(lang, "step2Title")}</h2>
-      <p className="extracted__hint">{t(lang, "step2Hint")}</p>
+    <div className="card extracted-panel">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+        <div>
+          <h2 style={{ fontSize: "22px", marginBottom: "6px" }}>{t(lang, "step2Title")}</h2>
+          <p style={{ color: "var(--muted)", fontSize: "14px" }}>{t(lang, "step2Hint")}</p>
+        </div>
+        {onBack && (
+          <button type="button" className="btn btn-ghost btn-sm" onClick={onBack}>
+            ← {t(lang, "backToEdit")}
+          </button>
+        )}
+      </div>
 
       {missing.length > 0 && (
-        <p className="extracted__missing-hint">{t(lang, "missingHint")}</p>
+        <div style={{ padding: "10px 14px", background: "#fffbeb", borderLeft: "3px solid #d97706", marginBottom: "20px", fontSize: "13.5px", color: "#92400e" }}>
+          ⚠️ {t(lang, "missingHint")}
+        </div>
       )}
 
-      <div className="extracted__fields">
-        {fieldRow(
-          t(lang, "field_domain"),
-          "domain",
+      {fields.trl_target !== "" && fields.trl_current !== "" && !targetAfterCurrent && (
+        <div style={{ padding: "10px 14px", background: "#fef2f2", borderLeft: "3px solid #e5533b", marginBottom: "20px", fontSize: "13.5px", color: "#b91c1c" }}>
+          ⚠️ TRL mục tiêu phải lớn hơn TRL hiện tại.
+        </div>
+      )}
+
+      <div className="extracted-fields">
+        {/* Domain */}
+        <div className="form-group">
+          <label>
+            <span>{t(lang, "field_domain")}</span>
+            <ProvenanceBadge classKey={provenanceFor("domain")} lang={lang} />
+          </label>
           <select
-            className="field__control"
+            className="form-control"
             value={fields.domain}
             onChange={(e) => editField("domain", e.target.value)}
           >
@@ -144,13 +142,16 @@ export default function ExtractedChallengeCard({
               </optgroup>
             ))}
           </select>
-        )}
+        </div>
 
-        {fieldRow(
-          t(lang, "field_trl_current"),
-          "trl_current",
+        {/* Current TRL */}
+        <div className="form-group">
+          <label>
+            <span>{t(lang, "field_trl_current")}</span>
+            <ProvenanceBadge classKey={provenanceFor("trl_current")} lang={lang} />
+          </label>
           <select
-            className="field__control"
+            className="form-control"
             value={fields.trl_current}
             onChange={(e) => editField("trl_current", e.target.value)}
           >
@@ -161,13 +162,16 @@ export default function ExtractedChallengeCard({
               </option>
             ))}
           </select>
-        )}
+        </div>
 
-        {fieldRow(
-          t(lang, "field_trl_target"),
-          "trl_target",
+        {/* Target TRL */}
+        <div className="form-group">
+          <label>
+            <span>{t(lang, "field_trl_target")}</span>
+            <ProvenanceBadge classKey={provenanceFor("trl_target")} lang={lang} />
+          </label>
           <select
-            className="field__control"
+            className="form-control"
             value={fields.trl_target}
             onChange={(e) => editField("trl_target", e.target.value)}
           >
@@ -178,30 +182,34 @@ export default function ExtractedChallengeCard({
               </option>
             ))}
           </select>
-        )}
+        </div>
 
-        {fieldRow(
-          t(lang, "field_timeline_months"),
-          "timeline_months",
+        {/* Timeline */}
+        <div className="form-group">
+          <label>
+            <span>{t(lang, "field_timeline_months")}</span>
+            <ProvenanceBadge classKey={provenanceFor("timeline_months")} lang={lang} />
+          </label>
           <input
-            className="field__control"
+            className="form-control"
             type="number"
             min={3}
             max={120}
             value={fields.timeline_months}
             onChange={(e) => editField("timeline_months", e.target.value)}
           />
-        )}
+        </div>
 
-        {fieldRow(
-          t(lang, "field_involvement_preference"),
-          "involvement_preference",
+        {/* Involvement Model */}
+        <div className="form-group" style={{ gridColumn: "span 2" }}>
+          <label>
+            <span>{t(lang, "field_involvement_preference")}</span>
+            <ProvenanceBadge classKey={provenanceFor("involvement_preference")} lang={lang} />
+          </label>
           <select
-            className="field__control"
+            className="form-control"
             value={fields.involvement_preference}
-            onChange={(e) =>
-              editField("involvement_preference", e.target.value)
-            }
+            onChange={(e) => editField("involvement_preference", e.target.value)}
           >
             <option value="">{t(lang, "selectPlaceholder")}</option>
             {involvementTypes.map((inv) => (
@@ -210,22 +218,28 @@ export default function ExtractedChallengeCard({
               </option>
             ))}
           </select>
-        )}
+        </div>
 
-        {fieldRow(
-          t(lang, "field_raw_text"),
-          "raw_text",
-          <div className="field__raw-text">{challenge.raw_text}</div>
-        )}
+        {/* Original Description */}
+        <div className="form-group" style={{ gridColumn: "span 2" }}>
+          <label>
+            <span>{t(lang, "field_raw_text")}</span>
+            <ProvenanceBadge classKey="USER_PROVIDED_DATA" lang={lang} />
+          </label>
+          <div style={{ padding: "12px 14px", background: "var(--surface)", border: "1px solid var(--line)", fontSize: "13.5px", color: "var(--muted)" }}>
+            {challenge.raw_text}
+          </div>
+        </div>
       </div>
 
       <button
         type="button"
-        className="extracted__confirm"
+        className="btn btn-green"
         disabled={!canConfirm || disabled}
         onClick={handleConfirm}
+        style={{ width: "100%" }}
       >
-        {t(lang, "confirmButton")}
+        {disabled ? t(lang, "matching") : t(lang, "confirmButton")} →
       </button>
     </div>
   );

@@ -1,12 +1,4 @@
-// WeightSimulator — step 3 top: 5 sliders (0–100) that re-run the SAME
-// deterministic MCDA via the parent's match call (rule §4/§9). Debounced
-// ~250ms so a slider drag fires ONE re-match, not one per tick.
-//
-// Contract: props = { weights, lang, onWeightsChange }. `weights` is the raw
-// (pre-normalization) 0–100 vector; `onWeightsChange(nextWeights)` is called
-// once after the user stops dragging. Normalized % is shown next to each bar.
-
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { t } from "../i18n";
 
 const CRITERIA = ["semantic", "domain", "trl", "timeline", "involvement"];
@@ -23,9 +15,6 @@ export default function WeightSimulator({ weights, lang, onWeightsChange }) {
   const timerRef = useRef(null);
   const firstRenderRef = useRef(true);
 
-  // Debounce: clear any pending call, then schedule one after inactivity.
-  // Skip the initial mount — the parent already has a report for these exact
-  // slider values, so firing onWeightsChange would only re-run a no-op match.
   useEffect(() => {
     if (firstRenderRef.current) {
       firstRenderRef.current = false;
@@ -38,7 +27,6 @@ export default function WeightSimulator({ weights, lang, onWeightsChange }) {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [values]);
 
   const total = Object.values(values).reduce((a, b) => a + b, 0);
@@ -48,22 +36,31 @@ export default function WeightSimulator({ weights, lang, onWeightsChange }) {
   }
 
   return (
-    <section className="weights">
-      <h3>{t(lang, "weightsTitle")}</h3>
-      <p className="weights__hint">{t(lang, "weightsHint")}</p>
+    <div className="weight-sim">
+      <div className="weight-sim-head">
+        <div>
+          <h3 style={{ fontSize: "17px", color: "var(--ink)", marginBottom: "4px" }}>
+            ⚡ {t(lang, "weightsTitle")}
+          </h3>
+          <p style={{ fontSize: "13px", color: "var(--muted)" }}>
+            {t(lang, "weightsHint")}
+          </p>
+        </div>
+      </div>
 
       {total === 0 && (
-        <p className="weights__zero-hint" role="status">
-          {t(lang, "weightsZeroHint")}
-        </p>
+        <div style={{ padding: "8px 12px", background: "#fffbeb", borderLeft: "3px solid #d97706", fontSize: "12.5px", color: "#92400e", marginBottom: "14px" }}>
+          ℹ️ {t(lang, "weightsZeroHint")}
+        </div>
       )}
 
-      <div className="weights__rows">
+      <div className="weight-rows">
         {CRITERIA.map((name) => {
           const pct = total > 0 ? Math.round((values[name] / total) * 100) : 0;
+
           return (
-            <div key={name} className="weights__row">
-              <label className="weights__label" htmlFor={`weight-${name}`}>
+            <div key={name} className="weight-row">
+              <label htmlFor={`weight-${name}`} style={{ fontWeight: 600 }}>
                 {t(lang, `criterion_${name}`)}
               </label>
               <input
@@ -73,14 +70,13 @@ export default function WeightSimulator({ weights, lang, onWeightsChange }) {
                 max={100}
                 value={values[name]}
                 onChange={(e) => handleChange(name, e.target.value)}
-                className="weights__slider"
               />
-              <span className="weights__value">{values[name]}</span>
-              <span className="weights__pct">{pct}%</span>
+              <span style={{ fontWeight: 700, textAlign: "right" }}>{values[name]}</span>
+              <span style={{ color: "var(--muted)", textAlign: "right" }}>{pct}%</span>
             </div>
           );
         })}
       </div>
-    </section>
+    </div>
   );
 }

@@ -1,12 +1,6 @@
-// ProvenanceBadge — shared Trust Layer chip (rule §7).
-// One badge per element: each field's origin is labeled exactly once.
-// `classKey` is a ProvenanceClass enum value; the label comes from the
-// matching `prov_*` i18n key, never hardcoded prose (rule §9).
-
+import React from "react";
 import { t } from "../i18n";
 
-// Fixed mapping: class key -> i18n label key + color token. Colors live in
-// styles.css as CSS custom properties so the badge stays presentational.
 const CLASS_META = {
   VERIFIED_CALCULATION: {
     colorVar: "var(--prov-verified)",
@@ -32,12 +26,11 @@ const CLASS_META = {
 
 export default function ProvenanceBadge({ classKey, lang }) {
   const meta = CLASS_META[classKey];
-  // Unknown class key renders nothing rather than a misleading label.
   if (!meta) return null;
 
   return (
     <span
-      className="prov-badge"
+      className={`prov-badge prov-badge--${classKey}`}
       style={{ "--badge-color": meta.colorVar }}
       title={t(lang, meta.labelKey)}
     >

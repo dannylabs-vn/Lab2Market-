@@ -11,9 +11,9 @@ export default function WhySection({ lang }) {
           <p>{t(lang, "whySub")}</p>
         </div>
 
-        <div className="why-bento">
+        <div className="why-bento reveal">
           {/* Card 1: Pure Deterministic Engine */}
-          <div className="bento-card col-7">
+          <div className="card b-main">
             <div>
               <div className="bento-card__badge">{t(lang, "bento1Badge")}</div>
               <h3>{t(lang, "bento1Title")}</h3>
@@ -27,7 +27,7 @@ export default function WhySection({ lang }) {
           </div>
 
           {/* Card 2: 5-Tier Provenance */}
-          <div className="bento-card col-5">
+          <div className="card b-side">
             <div>
               <div className="bento-card__badge">{t(lang, "bento2Badge")}</div>
               <h3>{t(lang, "bento2Title")}</h3>
@@ -50,7 +50,7 @@ export default function WhySection({ lang }) {
           </div>
 
           {/* Card 3: Instant Simulation */}
-          <div className="bento-card col-5">
+          <div className="card b-side">
             <div>
               <div className="bento-card__badge">{t(lang, "bento3Badge")}</div>
               <h3>{t(lang, "bento3Title")}</h3>
@@ -62,7 +62,7 @@ export default function WhySection({ lang }) {
           </div>
 
           {/* Card 4: Policy & Framework */}
-          <div className="bento-card col-7">
+          <div className="card b-main">
             <div>
               <div className="bento-card__badge">{t(lang, "bento4Badge")}</div>
               <h3>{t(lang, "bento4Title")}</h3>

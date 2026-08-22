@@ -94,10 +94,13 @@ export default function ExtractedChallengeCard({
 
   return (
     <div className="card extracted-panel">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
         <div>
-          <h2 style={{ fontSize: "22px", marginBottom: "6px" }}>{t(lang, "step2Title")}</h2>
-          <p style={{ color: "var(--muted)", fontSize: "14px" }}>{t(lang, "step2Hint")}</p>
+          <span style={{ fontSize: "12px", fontWeight: 800, letterSpacing: "0.06em", color: "var(--green-text)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>
+            STEP 2 OF 3
+          </span>
+          <h2 style={{ fontSize: "24px", marginBottom: "4px" }}>{t(lang, "step2Title")}</h2>
+          <p style={{ color: "var(--muted)", fontSize: "14.5px" }}>{t(lang, "step2Hint")}</p>
         </div>
         {onBack && (
           <button type="button" className="btn btn-ghost btn-sm" onClick={onBack}>
@@ -107,13 +110,13 @@ export default function ExtractedChallengeCard({
       </div>
 
       {missing.length > 0 && (
-        <div style={{ padding: "10px 14px", background: "#fffbeb", borderLeft: "3px solid #d97706", marginBottom: "20px", fontSize: "13.5px", color: "#92400e" }}>
+        <div style={{ padding: "12px 16px", background: "var(--amber-soft)", borderLeft: "4px solid var(--amber)", borderRadius: "var(--radius-sm)", marginBottom: "20px", fontSize: "14px", color: "#92400e", fontWeight: 600 }}>
           ⚠️ {t(lang, "missingHint")}
         </div>
       )}
 
       {fields.trl_target !== "" && fields.trl_current !== "" && !targetAfterCurrent && (
-        <div style={{ padding: "10px 14px", background: "#fef2f2", borderLeft: "3px solid #e5533b", marginBottom: "20px", fontSize: "13.5px", color: "#b91c1c" }}>
+        <div style={{ padding: "12px 16px", background: "var(--red-soft)", borderLeft: "4px solid var(--red)", borderRadius: "var(--radius-sm)", marginBottom: "20px", fontSize: "14px", color: "#b91c1c", fontWeight: 600 }}>
           ⚠️ TRL mục tiêu phải lớn hơn TRL hiện tại.
         </div>
       )}
@@ -226,7 +229,7 @@ export default function ExtractedChallengeCard({
             <span>{t(lang, "field_raw_text")}</span>
             <ProvenanceBadge classKey="USER_PROVIDED_DATA" lang={lang} />
           </label>
-          <div style={{ padding: "12px 14px", background: "var(--surface)", border: "1px solid var(--line)", fontSize: "13.5px", color: "var(--muted)" }}>
+          <div style={{ padding: "14px 16px", background: "var(--surface)", border: "1px solid var(--line-2)", borderRadius: "var(--radius-md)", fontSize: "14px", color: "var(--ink-2)", lineHeight: 1.55 }}>
             {challenge.raw_text}
           </div>
         </div>
@@ -237,7 +240,7 @@ export default function ExtractedChallengeCard({
         className="btn btn-green"
         disabled={!canConfirm || disabled}
         onClick={handleConfirm}
-        style={{ width: "100%" }}
+        style={{ width: "100%", padding: "14px 24px" }}
       >
         {disabled ? t(lang, "matching") : t(lang, "confirmButton")} →
       </button>

@@ -17,10 +17,10 @@ export default function HowSection({ lang }) {
           <h2>{t(lang, "howTitle")}</h2>
         </div>
 
-        <div className="how-steps">
+        <div className="steps reveal">
           {steps.map((s) => (
-            <div key={s.num} className="step-card">
-              <div className="step-num">{s.num}</div>
+            <div key={s.num} className="step">
+              <div className="num-badge">{s.num}</div>
               <h3>{s.title}</h3>
               <p>{s.desc}</p>
             </div>

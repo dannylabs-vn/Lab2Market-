@@ -18,7 +18,7 @@ from app.routers import extract, match, reference
 app = FastAPI(title="Lab2Market API", version="0.1.0")
 
 # CORS: the frontend origin is configuration, not a hardcoded literal.
-_frontend_origins = os.environ.get("FRONTEND_ORIGINS", "http://localhost:5173")
+_frontend_origins = os.environ.get("FRONTEND_ORIGINS", "http://localhost:5173,http://localhost:5174,http://localhost:5175")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in _frontend_origins.split(",")],

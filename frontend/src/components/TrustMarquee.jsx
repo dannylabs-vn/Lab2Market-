@@ -37,19 +37,15 @@ export default function TrustMarquee({ lang }) {
     return () => cancelAnimationFrame(rafId);
   }, []);
 
-  const items = [...PARTNERS, ...PARTNERS];
-
   return (
     <section className="trust">
       <div className="lab">{t(lang, "trust")}</div>
-      <div className="mq-wrapper">
-        <div className="mq" ref={marqueeRef}>
-          {items.map((p, idx) => (
-            <span key={`${p.code}-${idx}`}>
-              <strong>[{p.code}]</strong> {p.name}
-            </span>
-          ))}
-        </div>
+      <div className="mq" id="mq" ref={marqueeRef}>
+        {[...Array(10)].flatMap(() => PARTNERS).map((p, idx) => (
+          <span key={`${p.code}-${idx}`}>
+            {p.name}
+          </span>
+        ))}
       </div>
     </section>
   );

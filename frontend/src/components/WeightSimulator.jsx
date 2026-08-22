@@ -39,17 +39,20 @@ export default function WeightSimulator({ weights, lang, onWeightsChange }) {
     <div className="weight-sim">
       <div className="weight-sim-head">
         <div>
-          <h3 style={{ fontSize: "17px", color: "var(--ink)", marginBottom: "4px" }}>
+          <h3 style={{ fontSize: "18px", color: "var(--ink)", marginBottom: "4px" }}>
             ⚡ {t(lang, "weightsTitle")}
           </h3>
-          <p style={{ fontSize: "13px", color: "var(--muted)" }}>
+          <p style={{ fontSize: "13.5px", color: "var(--muted)" }}>
             {t(lang, "weightsHint")}
           </p>
         </div>
+        <span className="pill pill-green" style={{ textTransform: "uppercase" }}>
+          {lang === "vi" ? "Tự động sắp xếp 0ms" : "0ms Instant Rerank"}
+        </span>
       </div>
 
       {total === 0 && (
-        <div style={{ padding: "8px 12px", background: "#fffbeb", borderLeft: "3px solid #d97706", fontSize: "12.5px", color: "#92400e", marginBottom: "14px" }}>
+        <div style={{ padding: "10px 14px", background: "var(--amber-soft)", borderLeft: "3px solid var(--amber)", borderRadius: "var(--radius-sm)", fontSize: "13px", color: "#92400e", marginBottom: "16px", fontWeight: 600 }}>
           ℹ️ {t(lang, "weightsZeroHint")}
         </div>
       )}
@@ -60,7 +63,7 @@ export default function WeightSimulator({ weights, lang, onWeightsChange }) {
 
           return (
             <div key={name} className="weight-row">
-              <label htmlFor={`weight-${name}`} style={{ fontWeight: 600 }}>
+              <label htmlFor={`weight-${name}`} style={{ fontWeight: 700, color: "var(--ink)" }}>
                 {t(lang, `criterion_${name}`)}
               </label>
               <input
@@ -71,8 +74,8 @@ export default function WeightSimulator({ weights, lang, onWeightsChange }) {
                 value={values[name]}
                 onChange={(e) => handleChange(name, e.target.value)}
               />
-              <span style={{ fontWeight: 700, textAlign: "right" }}>{values[name]}</span>
-              <span style={{ color: "var(--muted)", textAlign: "right" }}>{pct}%</span>
+              <span style={{ fontWeight: 800, textAlign: "right", color: "var(--green-cta)" }}>{values[name]}</span>
+              <span style={{ color: "var(--muted)", textAlign: "right", fontWeight: 600 }}>{pct}%</span>
             </div>
           );
         })}

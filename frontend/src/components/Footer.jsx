@@ -3,76 +3,53 @@ import { t } from "../i18n";
 
 export default function Footer({ lang, setActiveView }) {
   return (
-    <footer className="site-footer">
+    <footer>
       <div className="wrap">
-        <div className="footer-grid">
-          {/* Col 1 */}
-          <div>
-            <div className="brand" style={{ color: "#fff", marginBottom: "14px" }}>
-              <div className="brand-icon">L2M</div>
-              <span>Lab2Market</span>
-            </div>
-            <p style={{ fontSize: "13.5px", color: "#a3b8b4", lineHeight: 1.6, maxWidth: "340px" }}>
-              {t(lang, "footerDesc")}
+        <div className="footer-inner">
+          <div className="f-brand">
+            <img src="/logo-white.png" alt="Lab2Market" style={{ height: "32px", marginBottom: "14px", objectFit: "contain" }} />
+            <div style={{ fontFamily: "var(--font-disp)", fontSize: "20px", fontWeight: 700, color: "#fff", marginBottom: "12px" }}>Lab2Market</div>
+            <p style={{ color: "var(--muted-2)", fontSize: "14px", lineHeight: "1.6", maxWidth: "340px" }}>
+              {lang === "vi"
+                ? "Nền tảng thương mại hóa nghiên cứu sâu AI-Powered. Nối liền khoảng cách từ Phòng thí nghiệm đến Thị trường."
+                : "AI-Powered Deep-Tech Commercialization Platform. Bridging the gap from Research Lab to Market."}
             </p>
           </div>
 
-          {/* Col 2 */}
-          <div className="footer-col">
-            <h5>{t(lang, "footerCol1")}</h5>
-            <ul>
-              <li>
-                <a href="#home" onClick={(e) => { e.preventDefault(); setActiveView("home"); }}>
-                  {t(lang, "navHome")}
-                </a>
-              </li>
-              <li>
-                <a href="#match" onClick={(e) => { e.preventDefault(); setActiveView("match"); }}>
-                  {t(lang, "navMatch")}
-                </a>
-              </li>
-              <li>
-                <a href="#directory" onClick={(e) => { e.preventDefault(); setActiveView("directory"); }}>
-                  {t(lang, "navDirectory")}
-                </a>
-              </li>
-            </ul>
-          </div>
+          <div className="f-links">
+            <div className="f-col">
+              <h5>{lang === "vi" ? "Sản phẩm" : "Product"}</h5>
+              <a onClick={() => setActiveView("match")}>{lang === "vi" ? "Bài toán R&D" : "R&D Challenges"}</a>
+              <a onClick={() => setActiveView("directory")}>{lang === "vi" ? "Danh mục Lab" : "Labs Directory"}</a>
+              <a onClick={() => setActiveView("analysis")}>{lang === "vi" ? "Ma trận TRL" : "TRL Matrix"}</a>
+              <a onClick={() => setActiveView("checklist")}>{lang === "vi" ? "Checklist Chuyển giao" : "Transfer Checklist"}</a>
+            </div>
 
-          {/* Col 3 */}
-          <div className="footer-col">
-            <h5>{t(lang, "footerCol2")}</h5>
-            <ul>
-              <li>
-                <a href="#analysis" onClick={(e) => { e.preventDefault(); setActiveView("analysis"); }}>
-                  {t(lang, "navAnalysis")}
-                </a>
-              </li>
-              <li>
-                <a href="#checklist" onClick={(e) => { e.preventDefault(); setActiveView("checklist"); }}>
-                  {t(lang, "navChecklist")}
-                </a>
-              </li>
-              <li>MCDA Engine v1.0</li>
-              <li>Trust Layer (5 Tiers)</li>
-            </ul>
-          </div>
+            <div className="f-col">
+              <h5>{lang === "vi" ? "Phương pháp" : "Methodology"}</h5>
+              <a href="#">MCDA Multi-Criteria</a>
+              <a href="#">TRL Assessment</a>
+              <a href="#">Trust Layer Badges</a>
+              <a href="#">Deterministic Engine</a>
+            </div>
 
-          {/* Col 4 */}
-          <div className="footer-col">
-            <h5>{t(lang, "footerCol3")}</h5>
-            <ul>
-              <li>Nghị quyết 57-NQ/TW</li>
-              <li>Nghị quyết 71/NQ-CP</li>
-              <li>Đề án 1.000 Tiến sĩ</li>
-              <li>AI Riser Vietnam 2026</li>
-            </ul>
+            <div className="f-col">
+              <h5>{lang === "vi" ? "Hợp tác & Đề án" : "Initiatives"}</h5>
+              <a href="#">Đề án 89 - 1.000 Tiến sĩ</a>
+              <a href="#">Đại học Quốc gia</a>
+              <a href="#">Trung tâm Đổi mới Sáng tạo</a>
+              <a href="#">Tech Transfer Offices</a>
+            </div>
           </div>
         </div>
 
-        <div className="footer-bottom">
-          <span>{t(lang, "footerCopy")}</span>
-          <span>Open Source AI Decision Support System</span>
+        <div className="f-bottom">
+          <span>© 2026 Lab2Market. All rights reserved.</span>
+          <div className="f-legals">
+            <a href="#">{lang === "vi" ? "Bảo mật" : "Privacy"}</a>
+            <a href="#">{lang === "vi" ? "Điều khoản" : "Terms"}</a>
+            <a href="#">{lang === "vi" ? "Liên hệ" : "Contact"}</a>
+          </div>
         </div>
       </div>
     </footer>

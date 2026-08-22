@@ -2,81 +2,55 @@ import React from "react";
 import { t } from "../i18n";
 
 export default function Navbar({ lang, setLang, activeView, setActiveView }) {
-  const toggleLang = () => {
-    setLang((prev) => (prev === "vi" ? "en" : "vi"));
-  };
-
   return (
-    <header className="site-header">
+    <header>
       <div className="wrap nav">
-        <div className="brand" onClick={() => setActiveView("home")}>
-          <div className="brand-icon">L2M</div>
-          <span>Lab2Market</span>
+        <div 
+          className="brand" 
+          style={{ cursor: "pointer" }} 
+          onClick={() => setActiveView("home")}
+        >
+          <img src="/logo-white.png" alt="Lab2Market" style={{ height: "26px", objectFit: "contain" }} />
+          <span style={{ marginLeft: "8px" }}>Lab2Market</span>
         </div>
 
-        <nav className="nav-links">
-          <button
-            type="button"
-            className={activeView === "home" ? "active" : ""}
-            onClick={() => setActiveView("home")}
-          >
-            {t(lang, "navHome")}
-          </button>
-          <button
-            type="button"
-            className={activeView === "match" ? "active" : ""}
-            onClick={() => setActiveView("match")}
-          >
-            {t(lang, "navMatch")}
-          </button>
-          <button
-            type="button"
-            className={activeView === "directory" ? "active" : ""}
-            onClick={() => setActiveView("directory")}
-          >
-            {t(lang, "navDirectory")}
-          </button>
-          <button
-            type="button"
-            className={activeView === "analysis" ? "active" : ""}
-            onClick={() => setActiveView("analysis")}
-          >
-            {t(lang, "navAnalysis")}
-          </button>
-          <button
-            type="button"
-            className={activeView === "checklist" ? "active" : ""}
-            onClick={() => setActiveView("checklist")}
-          >
-            {t(lang, "navChecklist")}
-          </button>
-        </nav>
+        <div className="links">
+          <a onClick={() => setActiveView("match")}>
+            {lang === "vi" ? "Bài toán R&D" : "R&D Challenges"}
+          </a>
+          <a onClick={() => setActiveView("directory")}>
+            {lang === "vi" ? "Công nghệ" : "Technologies"}
+          </a>
+          <a onClick={() => setActiveView("analysis")}>
+            {lang === "vi" ? "Phân tích MCDA" : "Analysis"}
+          </a>
+          <a onClick={() => setActiveView("checklist")}>
+            {lang === "vi" ? "Checklist Chuyển giao" : "Checklist"}
+          </a>
+        </div>
 
-        <div className="nav-right">
-          <span className="nav-slogan">{t(lang, "trustSlogan")}</span>
-          <div className="lang-toggle">
+        <div className="right">
+          <div className="lang">
             <button
-              type="button"
-              className={lang === "vi" ? "active" : ""}
+              className={lang === "vi" ? "on" : ""}
               onClick={() => setLang("vi")}
             >
               VI
             </button>
             <button
-              type="button"
-              className={lang === "en" ? "active" : ""}
+              className={lang === "en" ? "on" : ""}
               onClick={() => setLang("en")}
             >
               EN
             </button>
           </div>
+
           {activeView !== "match" && (
             <button
-              type="button"
               className="btn btn-green btn-sm"
               onClick={() => setActiveView("match")}
             >
-              {t(lang, "startMatching")}
+              {t(lang, "startMatching")} →
             </button>
           )}
         </div>

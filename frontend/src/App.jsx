@@ -8,7 +8,7 @@ import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import TrustMarquee from "./components/TrustMarquee";
 import DomainPicker from "./components/DomainPicker";
-import LabsDirectory, { SEED_LABS } from "./components/LabsDirectory";
+import LabsDirectory from "./components/LabsDirectory";
 import WhySection from "./components/WhySection";
 import HowSection from "./components/HowSection";
 import Manifesto from "./components/Manifesto";
@@ -27,6 +27,7 @@ import OnboardingForm from "./components/OnboardingForm";
 import ExtractedChallengeCard from "./components/ExtractedChallengeCard";
 import WeightSimulator from "./components/WeightSimulator";
 import MatchExplanationCard from "./components/MatchExplanationCard";
+import AIAssistantMascot from "./components/AIAssistantMascot";
 
 const DEFAULT_SLIDER = {
   semantic: 35,
@@ -50,14 +51,11 @@ export default function App() {
   const [reference, setReference] = useState(null);
   const [challenge, setChallenge] = useState(null);
   const [sliderValues, setSliderValues] = useState(DEFAULT_SLIDER);
-  // `report` is the canonical backend response; `displayReport` is what we
-  // actually render — the same as report but with client-side re-ranked list.
   const [report, setReport] = useState(null);
   const [displayReport, setDisplayReport] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(null); // null | "analyzing" | "matching"
   const [isMock, setIsMock] = useState(false);
-  const homeRef = useRef(null);
 
   // Comparison tray state
   const [compareList, setCompareList] = useState([]);
@@ -78,7 +76,7 @@ export default function App() {
       .catch((e) => setError(e.message || String(e)));
   }, [lang]);
 
-  // Reveal-on-scroll IntersectionObserver — matches Vaya's page.tsx useEffect
+  // Reveal-on-scroll IntersectionObserver
   useEffect(() => {
     if (activeView !== "home") return;
     const io = new IntersectionObserver(
@@ -91,7 +89,6 @@ export default function App() {
         }),
       { threshold: 0.1 }
     );
-    // Small delay lets React finish painting the home view
     const timer = setTimeout(() => {
       document.querySelectorAll(".reveal:not(.in)").forEach((el) => io.observe(el));
     }, 100);
@@ -132,7 +129,6 @@ export default function App() {
       };
       const data = await matchChallenge(nextChallenge, weights, lang);
       setReport(data);
-      // Display = backend result with current slider ordering
       setDisplayReport({ ...data, ranked: clientRerank(data.ranked, nextSliders) });
       setStep("report");
       setActiveView("match");
@@ -149,8 +145,6 @@ export default function App() {
     runMatch(nextChallenge, sliderValues);
   }
 
-  // Weight changes re-rank client-side ONLY — never touch the backend.
-  // This avoids rate-limit 429s and gives instant feedback (0ms latency).
   function handleWeightsChange(nextSliders) {
     setSliderValues(nextSliders);
     if (report) {
@@ -172,7 +166,7 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function handleSelectDomainFromPicker(domainId) {
+  function handleSelectDomainFromPicker() {
     setActiveView("directory");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -213,7 +207,7 @@ export default function App() {
       {/* Global Error Banner */}
       {error && (
         <div className="wrap" style={{ marginTop: "16px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "12px 16px", background: "#fef2f2", borderLeft: "4px solid #dc2626", color: "#b91c1c", fontSize: "14px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "12px 16px", background: "var(--red-soft)", borderLeft: "4px solid var(--red)", color: "#b91c1c", fontSize: "14px", borderRadius: "var(--radius-sm)" }}>
             <strong>{t(lang, "errorTitle")}:</strong> {error}
             <button
               type="button"
@@ -227,37 +221,39 @@ export default function App() {
         </div>
       )}
 
-      {/* View: Home */}
-      {activeView === "home" && (
-        <main style={{ flex: 1 }}>
-          <Hero
-            lang={lang}
-            onStartMatch={handleExtract}
-          />
+      {/* Main Content Area - wrapped in page-above to fix footer overlap */}
+      <div className="page-above">
+        {/* View: Home */}
+        {activeView === "home" && (
+          <main id="homeView">
+            <Hero
+              lang={lang}
+              onStartMatch={handleExtract}
+            />
 
-          <TrustMarquee lang={lang} />
+            <TrustMarquee lang={lang} />
 
-          <DomainPicker
-            lang={lang}
-            onSelectDomain={handleSelectDomainFromPicker}
-          />
+            <DomainPicker
+              lang={lang}
+              onSelectDomain={handleSelectDomainFromPicker}
+            />
 
-          <LabsDirectory
-            lang={lang}
-            onStartMatchWithLab={handleStartMatchWithLab}
-            compareList={compareList}
-            onToggleCompare={toggleCompare}
-          />
+            <LabsDirectory
+              lang={lang}
+              onStartMatchWithLab={handleStartMatchWithLab}
+              compareList={compareList}
+              onToggleCompare={toggleCompare}
+            />
 
-          <WhySection lang={lang} />
-          <HowSection lang={lang} />
-          <Manifesto lang={lang} />
-          <ValueBand lang={lang} />
-          <Testimonials lang={lang} />
-          <Faq lang={lang} />
-          <CTA lang={lang} onStartMatch={() => setActiveView("match")} />
-        </main>
-      )}
+            <WhySection lang={lang} />
+            <HowSection lang={lang} />
+            <Manifesto lang={lang} />
+            <ValueBand lang={lang} />
+            <Testimonials lang={lang} />
+            <Faq lang={lang} />
+            <CTA lang={lang} onStartMatch={() => setActiveView("match")} />
+          </main>
+        )}
 
       {/* View: Match / Decision Studio */}
       {activeView === "match" && (
@@ -282,8 +278,16 @@ export default function App() {
             </div>
 
             {loading && (
-              <div style={{ textAlign: "center", padding: "40px", color: "var(--muted)", fontSize: "16px", fontWeight: 600 }}>
-                ⏳ {t(lang, loading)}
+              <div style={{ display: "grid", placeItems: "center", padding: "40px 0" }}>
+                <AIAssistantMascot
+                  state={loading === "analyzing" ? "researching" : "matching"}
+                  lang={lang}
+                  message={
+                    loading === "analyzing"
+                      ? (lang === "vi" ? "Đang phân tích và trích xuất TRL bài toán..." : "Extracting TRL & domain details...")
+                      : (lang === "vi" ? "Đang chạy thuật toán MCDA khớp nối đối tác..." : "Running MCDA partner matching matrix...")
+                  }
+                />
               </div>
             )}
 
@@ -298,7 +302,7 @@ export default function App() {
             {step === "extracted" && challenge && !loading && (
               <>
                 {isMock && (
-                  <div style={{ padding: "10px 14px", background: "#fffbeb", borderLeft: "4px solid #d97706", marginBottom: "20px", fontSize: "13.5px", color: "#92400e" }}>
+                  <div style={{ padding: "12px 16px", background: "var(--amber-soft)", borderLeft: "4px solid var(--amber)", borderRadius: "var(--radius-sm)", marginBottom: "20px", fontSize: "14px", color: "#92400e" }}>
                     ℹ️ {t(lang, "mockNotice")}
                   </div>
                 )}
@@ -365,12 +369,13 @@ export default function App() {
         </main>
       )}
 
-      {/* View: Partnership Checklist */}
-      {activeView === "checklist" && (
-        <main style={{ flex: 1 }}>
-          <PartnershipChecklist lang={lang} />
-        </main>
-      )}
+        {/* View: Partnership Checklist */}
+        {activeView === "checklist" && (
+          <main style={{ flex: 1 }}>
+            <PartnershipChecklist lang={lang} />
+          </main>
+        )}
+      </div> {/* End page-above */}
 
       {/* Universal Compare Bar */}
       <CompareBar
